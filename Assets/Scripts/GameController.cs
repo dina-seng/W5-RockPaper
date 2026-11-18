@@ -1,67 +1,98 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 // Rock - Paper - Scissors
 // 1 = Rock, 2 = Paper, 3 = Scissors, 4 = Unknown ("?")
+
 public class GameController : MonoBehaviour
 {
-    Image imgYou;       // your selected image (rock, paper, scissor)
-    Image imgCom;       // computer selected image (rock, paper, scissor)
+    // UI Image references
+    [Header("Player Images")]
+    [SerializeField] private Image imgYou;
+    [SerializeField] private Image imgCom;
 
-    Text txtYou;        // the score you win
-    Text txtCom;        // the score computer win
-    Text txtResult;     // the result
+    // UI Text references
+    [Header("Score and Result")]
+    [SerializeField] private TMP_Text txtYou;
+    [SerializeField] private TMP_Text txtCom;
+    [SerializeField] private TMP_Text txtResult;
 
-    int cntYou = 0;     // number you win
-    int cntCom = 0;     // number computer win
-
+    // Scores
+    private int cntYou = 0;
+    private int cntCom = 0;
 
     private void InitGame()
     {
-        // names must match the objects in the scene exactly
-        imgYou = GameObject.Find("ImgYou").GetComponent<Image>();
-        imgCom = GameObject.Find("ImgCom").GetComponent<Image>();
-        txtYou = GameObject.Find("TxtYou").GetComponent<Text>();
-        txtCom = GameObject.Find("TxtCom").GetComponent<Text>();
-        txtResult = GameObject.Find("TxtResult_").GetComponent<Text>();
+        // Display initial question mark images
+        imgYou.sprite = Resources.Load<Sprite>("img_4");
+        imgCom.sprite = Resources.Load<Sprite>("img_4");
 
+        // Initialize scores
+        cntYou = 0;
+        cntCom = 0;
+
+        txtYou.text = cntYou.ToString();
+        txtCom.text = cntCom.ToString();
+
+        // Initial message
         txtResult.text = "Select the button below";
     }
 
-    void Start()
+    private void Start()
     {
-        // init the game
         InitGame();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        // exit if press escape key
+        // Exit game when pressing Escape
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
         }
     }
 
-    // Slides 24-31: link this function to the On Click () event of every button.
-    // Pass the button itself as the GameObject parameter.
+    // Called when player clicks Rock, Paper, or Scissors
     public void OnButtonClick(GameObject buttonObject)
     {
-        Debug.Log(buttonObject.name + " clicked ");
+        Debug.Log(buttonObject.name + " clicked");
+        int you = 0;
 
-        // button names start with 1_, 2_ or 3_
-        int you = int.Parse(buttonObject.name.Substring(0, 1));
+        // Extract the first character
+        string firstCharacter = buttonObject.name.Substring(0, 1);
+        switch (buttonObject.name)
+        {
+            case "Rock_Button":
+                you = 1;
+                break;
+
+            case "Paper_Button":
+                you = 2;
+                break;
+
+            case "Scissors_Button":
+                you = 3;
+                break;
+
+            default:
+                Debug.LogError("Invalid button name: " + buttonObject.name);
+                return;
+        }
+
+
         CheckResult(you);
+
+
     }
 
-    void CheckResult(int yourResult)
+    private void CheckResult(int yourResult)
     {
-        Debug.Log("Your result is: " + yourResult);
+        // Generate computer choice (1, 2, or 3)
+        int comResult = Random.Range(1, 4);
 
-        int comResult = UnityEngine.Random.Range(1, 4);
+        // Compare player and computer choices
         int k = yourResult - comResult;
 
         if (k == 0)
@@ -79,17 +110,22 @@ public class GameController : MonoBehaviour
             cntCom++;
         }
 
+        // Update images and scores
         SetResult(yourResult, comResult);
     }
 
-    void SetResult(int you, int com)
+    private void SetResult(int you, int com)
     {
-        imgYou.sprite = Resources.Load("img_" + you, typeof(Sprite)) as Sprite;
-        imgCom.sprite = Resources.Load("img_" + com, typeof(Sprite)) as Sprite;
+        // Display player's selected image
+        imgYou.sprite = Resources.Load<Sprite>("img_" + you);
 
-        // flip the computer hand so it faces you
+        // Display computer's selected image
+        imgCom.sprite = Resources.Load<Sprite>("img_" + com);
+
+        // Flip computer image horizontally
         imgCom.transform.localScale = new Vector3(-1, 1, 1);
 
+        // Update scores
         txtYou.text = cntYou.ToString();
         txtCom.text = cntCom.ToString();
     }
